@@ -1,0 +1,10 @@
+[package]
+name = "idlepaste"
+version = "0.1.0"
+authors = ["mz2212 <michaelpulliam1@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9"
+select = "0.4"
+url = "1.7"
