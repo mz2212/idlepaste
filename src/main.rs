@@ -9,23 +9,33 @@ use select::document::Document;
 use select::predicate::{Class, Predicate, Name};
 
 fn main() {
-	let site = "https://pastebin.com";
+	let site = "https://gist.github.com";
 	let delay = time::Duration::from_secs(1);
 	loop {
-		let mut response = reqwest::get(site).unwrap();
+		let mut response = reqwest::get(format!("{}/discover", site).as_str()).unwrap();
 
 		let mut body = String::new();
 		response.read_to_string(&mut body).unwrap();
-		let mut dom = Document::from(body.as_str());
+		let dom = Document::from(body.as_str());
 
-		let pre_node = dom.find(Class("right_menu")
+		let mut pre_node = dom.find(Class("d-inline-block")
+			.descendant(Name("a")))
+			.last()
+			.unwrap();
+
+		let mut link = pre_node.attr("href").unwrap();
+		sleep(delay);
+		response = reqwest::get(format!("{}/{}", site, link).as_str()).unwrap();
+		body = String::new();
+		response.read_to_string(&mut body).unwrap();
+		let dom = Document::from(body.as_str());
+		pre_node = dom.find(Class("file-actions")
 			.descendant(Name("a")))
 			.next()
 			.unwrap();
 
-		let link = pre_node.attr("href").unwrap();
-		sleep(delay);
-		response = reqwest::get(format!("{}/raw{}", site, link).as_str()).unwrap();
+		link = pre_node.attr("href").unwrap();
+		response = reqwest::get(format!("{}/{}", site, link).as_str()).unwrap();
 		body = String::new();
 		response.read_to_string(&mut body).unwrap();
 		slow_print(body);
@@ -34,7 +44,7 @@ fn main() {
 }
 
 fn slow_print(data: String) {
-	let delay = time::Duration::from_millis(125); // ~120 WPM
+	let delay = time::Duration::from_millis(30);
 	for c in data.chars() {
 		print!("{}", c);
 		io::stdout().flush().unwrap();
