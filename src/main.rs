@@ -12,20 +12,20 @@ fn main() {
 	let site = "https://pastebin.com";
 	let delay = time::Duration::from_secs(1);
 	loop {
-		let mut response = reqwest::get(site).unwrap();
+		let mut response = reqwest::blocking::get(site).unwrap();
 
 		let mut body = String::new();
 		response.read_to_string(&mut body).unwrap();
-		let mut dom = Document::from(body.as_str());
+		let dom = Document::from(body.as_str());
 
-		let pre_node = dom.find(Class("right_menu")
+		let pre_node = dom.find(Class("sidebar__menu")
 			.descendant(Name("a")))
 			.next()
 			.unwrap();
 
 		let link = pre_node.attr("href").unwrap();
 		sleep(delay);
-		response = reqwest::get(format!("{}/raw{}", site, link).as_str()).unwrap();
+		response = reqwest::blocking::get(format!("{}/raw{}", site, link).as_str()).unwrap();
 		body = String::new();
 		response.read_to_string(&mut body).unwrap();
 		slow_print(body);
